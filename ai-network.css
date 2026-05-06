@@ -1,0 +1,204 @@
+/* ============================================================
+   AI Agents — network animation
+   Self-contained styles for the .cap__visual block inside
+   .cap--featured. Loaded after styles.css.
+
+   Concept:
+     · Two slow-rotating rings = system boundary
+     · 6 dashed lines from core to outer nodes = active connections
+     · Bright packets travelling outward along each line = agents
+       moving data through the workflow
+     · Pulsing rings radiating from the core = the agent thinking
+     · Glowing centre dot = the agent itself
+     · Soft-blinking outer nodes = the tools / workflows it touches
+   ============================================================ */
+
+.cap__visual {
+  /* Tunables — change in one place */
+  --net-accent:       var(--accent, #CDF44A);
+  --net-accent-soft:  rgba(205, 244, 74, 0.34);
+  --net-accent-faint: rgba(205, 244, 74, 0.18);
+  --net-spin:   80s;
+  --net-pulse:  2.6s;
+  --net-flow:   3.2s;
+  --net-blink:  4s;
+
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  align-self: center;
+  min-height: 220px;
+  width: 100%;
+}
+
+.cap__net {
+  width: 100%;
+  max-width: 240px;
+  height: auto;
+  display: block;
+  overflow: visible;        /* let glows extend past the viewBox */
+}
+
+/* The fix that makes everything else work:
+   anchor every SVG transform to its element's own bounding-box
+   centre instead of the SVG origin. */
+.cap__net circle,
+.cap__net line {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* ── Outer rotating rings ─────────────────────────────────── */
+.net__ring {
+  fill: none;
+  stroke: var(--net-accent-faint);
+  stroke-width: 1;
+  stroke-dasharray: 2 6;
+  animation: net-spin var(--net-spin) linear infinite;
+}
+.net__ring--inner {
+  stroke-dasharray: 1 4;
+  animation-duration: calc(var(--net-spin) * 0.6);
+  animation-direction: reverse;
+}
+
+/* ── Connecting lines ─────────────────────────────────────── */
+.net__lines line {
+  stroke: var(--net-accent-soft);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+  animation: net-flow 4s linear infinite;
+}
+.net__lines line:nth-child(1) { animation-delay:  0s; }
+.net__lines line:nth-child(2) { animation-delay: -.6s; }
+.net__lines line:nth-child(3) { animation-delay: -1.2s; }
+.net__lines line:nth-child(4) { animation-delay: -1.8s; }
+.net__lines line:nth-child(5) { animation-delay: -2.4s; }
+.net__lines line:nth-child(6) { animation-delay: -3s; }
+
+/* ── Data packets travelling outward ──────────────────────── */
+.net__packet {
+  r: 2.6;
+  fill: var(--net-accent);
+  filter: drop-shadow(0 0 6px var(--net-accent));
+  opacity: 0;
+  animation-duration: var(--net-flow);
+  animation-iteration-count: infinite;
+  animation-timing-function: cubic-bezier(.4, 0, .6, 1);
+}
+.net__packet--1 { animation-name: net-packet-1; }
+.net__packet--2 { animation-name: net-packet-2; animation-delay: -0.5s; }
+.net__packet--3 { animation-name: net-packet-3; animation-delay: -1.0s; }
+.net__packet--4 { animation-name: net-packet-4; animation-delay: -1.5s; }
+.net__packet--5 { animation-name: net-packet-5; animation-delay: -2.0s; }
+.net__packet--6 { animation-name: net-packet-6; animation-delay: -2.5s; }
+
+/* ── Core pulses ──────────────────────────────────────────── */
+.net__pulse {
+  fill: none;
+  stroke: var(--net-accent);
+  stroke-width: 1.5;
+  opacity: 0;
+  animation: net-pulse var(--net-pulse) cubic-bezier(.4, 0, .6, 1) infinite;
+}
+.net__pulse--lg {
+  animation-delay: calc(var(--net-pulse) * -0.5);
+}
+
+/* ── Core (the agent) ─────────────────────────────────────── */
+.net__core {
+  fill: var(--net-accent);
+  filter: drop-shadow(0 0 12px var(--net-accent));
+}
+
+/* ── Outer nodes ──────────────────────────────────────────── */
+.net__nodes circle {
+  fill: var(--net-accent);
+  filter: drop-shadow(0 0 4px var(--net-accent));
+  animation: net-blink var(--net-blink) cubic-bezier(.4, 0, .6, 1) infinite;
+}
+.net__nodes circle:nth-child(1) { animation-delay:  0s; }
+.net__nodes circle:nth-child(2) { animation-delay: -.6s; }
+.net__nodes circle:nth-child(3) { animation-delay: -1.2s; }
+.net__nodes circle:nth-child(4) { animation-delay: -1.8s; }
+.net__nodes circle:nth-child(5) { animation-delay: -2.4s; }
+.net__nodes circle:nth-child(6) { animation-delay: -3s; }
+
+/* ── Keyframes ────────────────────────────────────────────── */
+@keyframes net-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes net-flow {
+  to { stroke-dashoffset: -16; }
+}
+
+@keyframes net-pulse {
+  0%   { transform: scale(1);   opacity: 0.55; }
+  100% { transform: scale(2.7); opacity: 0;    }
+}
+
+@keyframes net-blink {
+  0%, 100% { opacity: 1;    transform: scale(1);    }
+  50%      { opacity: 0.45; transform: scale(0.85); }
+}
+
+/* Animating cx/cy via CSS — supported in all modern browsers
+   (Chrome 81+, Firefox 92+, Safari 14+). */
+@keyframes net-packet-1 {  /* → 120, 32  · north */
+  0%   { cx: 120; cy: 120; opacity: 0; }
+  10%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { cx: 120; cy: 32;  opacity: 0; }
+}
+@keyframes net-packet-2 {  /* → 195, 75  · north-east */
+  0%   { cx: 120; cy: 120; opacity: 0; }
+  10%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { cx: 195; cy: 75;  opacity: 0; }
+}
+@keyframes net-packet-3 {  /* → 200, 170 · south-east */
+  0%   { cx: 120; cy: 120; opacity: 0; }
+  10%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { cx: 200; cy: 170; opacity: 0; }
+}
+@keyframes net-packet-4 {  /* → 120, 208 · south */
+  0%   { cx: 120; cy: 120; opacity: 0; }
+  10%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { cx: 120; cy: 208; opacity: 0; }
+}
+@keyframes net-packet-5 {  /* → 44, 180  · south-west */
+  0%   { cx: 120; cy: 120; opacity: 0; }
+  10%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { cx: 44;  cy: 180; opacity: 0; }
+}
+@keyframes net-packet-6 {  /* → 40, 74   · north-west */
+  0%   { cx: 120; cy: 120; opacity: 0; }
+  10%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { cx: 40;  cy: 74;  opacity: 0; }
+}
+
+/* Scale the network down on smaller viewports */
+@media (max-width: 1080px) {
+  .cap__visual { min-height: 200px; }
+  .cap__net { max-width: 200px; }
+}
+@media (max-width: 600px) {
+  .cap__visual { min-height: 180px; }
+  .cap__net { max-width: 180px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .net__ring,
+  .net__lines line,
+  .net__packet,
+  .net__pulse,
+  .net__nodes circle {
+    animation: none !important;
+  }
+}
